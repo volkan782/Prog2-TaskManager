@@ -1,0 +1,8 @@
+package hu.pte.taskmanager.persistence;
+import hu.pte.taskmanager.model.Task; import hu.pte.taskmanager.service.*; import java.io.*; import java.nio.charset.StandardCharsets; import java.nio.file.*; import java.util.*;
+/** Tab-separated text with Base64 titles to safely preserve special characters. */
+public final class TaskStorage {
+ private final Path path; public TaskStorage(Path path){this.path=Objects.requireNonNull(path);}
+ public void save(TaskManager manager) throws IOException {Path parent=path.toAbsolutePath().getParent();if(parent!=null)Files.createDirectories(parent);try(BufferedWriter out=Files.newBufferedWriter(path,StandardCharsets.UTF_8)){for(Task task:manager.all()){String title=Base64.getEncoder().encodeToString(task.getTitle().getBytes(StandardCharsets.UTF_8));out.write(task.getType()+"\t"+task.getId()+"\t"+task.isCompleted()+"\t"+title);out.newLine();}}}
+ public TaskManager load() throws IOException {TaskManager result=new TaskManager();if(!Files.exists(path))return result;try(BufferedReader in=Files.newBufferedReader(path,StandardCharsets.UTF_8)){String line;int number=0;while((line=in.readLine())!=null){number++;try{String[] parts=line.split("\t",-1);if(parts.length!=4 || !(parts[2].equals("true")||parts[2].equals("false")))throw new IllegalArgumentException("Invalid record");String title=new String(Base64.getDecoder().decode(parts[3]),StandardCharsets.UTF_8);result.restore(TaskFactory.create(parts[0],Integer.parseInt(parts[1]),title,Boolean.parseBoolean(parts[2])));}catch(RuntimeException e){throw new IOException("Invalid data on line "+number,e);}}}return result;}
+}

@@ -1,0 +1,39 @@
+@startuml
+skinparam classAttributeIconSize 0
+abstract class Task {
+ - id: int
+ - title: String
+ - completed: boolean
+ + complete(): void
+ + getType(): String
+ + getPriority(): int
+}
+class RegularTask
+class UrgentTask
+class TaskManager {
+ - tasks: List<Task>
+ + add(type, title): Task
+ + complete(id): void
+ + listByPriority(): List<Task>
+}
+class TaskFactory {
+ + create(type,id,title,done): Task
+}
+class TaskStorage {
+ + save(manager): void
+ + load(): TaskManager
+}
+class ConsoleUI {
+ + run(): void
+}
+class TaskException
+Task <|-- RegularTask
+Task <|-- UrgentTask
+TaskManager "1" o-- "0..*" Task : manages
+TaskFactory ..> Task : creates
+TaskManager ..> TaskFactory
+TaskStorage ..> TaskManager
+ConsoleUI --> "1" TaskManager
+ConsoleUI --> "1" TaskStorage
+TaskManager ..> TaskException
+@enduml
