@@ -10,4 +10,20 @@ public final class TaskManager {
  public List<Task> listByPriority(){List<Task> result=new ArrayList<>(tasks);result.sort(Comparator.comparingInt(Task::getPriority).reversed().thenComparing(Task::getTitle));return result;}
  public List<Task> listByTitle(){List<Task> result=new ArrayList<>(tasks);result.sort(Comparator.comparing(Task::getTitle,String.CASE_INSENSITIVE_ORDER));return result;}
  public List<Task> all(){return List.copyOf(tasks);}
+
+    public List<Task> listByStatus(boolean completed) {
+        List<Task> result = new ArrayList<>();
+
+        for (Task task : tasks) {
+            if (task.isCompleted() == completed) {
+                result.add(task);
+            }
+        }
+
+        result.sort(Comparator.comparing(Task::getTitle,
+                String.CASE_INSENSITIVE_ORDER));
+
+        return result;
+    }
+
 }
